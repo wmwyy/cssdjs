@@ -33,6 +33,63 @@ def _fmt(x, nd: int = 6) -> str:
         return str(x)
 
 
+def _add_text_with_format(paragraph, text):
+    """添加带上下标格式的文本
+    
+    支持的格式：
+    - H0, d50 等数字下标
+    - m³, m² 等上标
+    - γs, γw 等希腊字母+下标
+    """
+    import re
+    
+    # 将 m³ 临时替换以便处理
+    text = text.replace('m³', '<<m3>>')
+    text = text.replace('m²', '<<m2>>')
+    text = text.replace('kN/m³', '<<kNm3>>')
+    
+    # 正则匹配变量名+数字（如H0, d50, k1, L0, B等）
+    pattern = r'([A-Za-zγαθ]+)(\d+)'
+    parts = re.split(r'(<<.*?>>)', text)  # 先分割特殊标记
+    
+    for part in parts:
+        if part.startswith('<<') and part.endswith('>>'):
+            # 处理特殊标记
+            if part == '<<m3>>':
+                paragraph.add_run('m')
+                run = paragraph.add_run('3')
+                run.font.superscript = True
+            elif part == '<<m2>>':
+                paragraph.add_run('m')
+                run = paragraph.add_run('2')
+                run.font.superscript = True
+            elif part == '<<kNm3>>':
+                paragraph.add_run('kN/m')
+                run = paragraph.add_run('3')
+                run.font.superscript = True
+        else:
+            # 处理普通文本和下标
+            last_end = 0
+            for match in re.finditer(pattern, part):
+                # 添加匹配前的文本
+                if match.start() > last_end:
+                    paragraph.add_run(part[last_end:match.start()])
+                
+                # 添加变量名
+                var_name = match.group(1)
+                subscript = match.group(2)
+                
+                paragraph.add_run(var_name)
+                run = paragraph.add_run(subscript)
+                run.font.subscript = True
+                
+                last_end = match.end()
+            
+            # 添加剩余文本
+            if last_end < len(part):
+                paragraph.add_run(part[last_end:])
+
+
 def _build_doc_base():
     Document, WD_ALIGN_PARAGRAPH, WD_LINE_SPACING, qn, Cm, Pt = _require_docx()
 
@@ -92,10 +149,13 @@ def _build_doc_base():
         p.paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
         p.paragraph_format.line_spacing = 1.5
 
-    def add_line(text: str, *, level: int = 0):
+    def add_line(text: str, *, level: int = 0, use_format: bool = True):
         p = doc.add_paragraph()
         apply_body_para_format(p, level=level)
-        p.add_run(text)
+        if use_format:
+            _add_text_with_format(p, text)
+        else:
+            p.add_run(text)
         return p
 
     return doc, add_title, add_h, add_line, Cm
