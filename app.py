@@ -62,6 +62,13 @@ st.markdown("""
         border-radius: 8px;
         border-left: 4px solid #ff9800;
         margin: 1rem 0;
+        color: #663c00;
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    .warning-box strong {
+        color: #e65100;
+        font-weight: 600;
     }
     h1 {
         color: #2c3e50;

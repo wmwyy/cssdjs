@@ -179,38 +179,41 @@ def export_d21_docx(
 
     add_h("1  已知条件")
     add_line(
-        "H0={H0} m，d50={d50} m，U={U} m/s，L0={L0} m，B={B} m".format(
+        "H₀={H0} m，d₅₀={d50} m，U={U} m/s，L₀={L0} m，B={B} m".format(
             H0=_fmt(inputs.get("H0"), 6),
             d50=_fmt(inputs.get("d50"), 6),
             U=_fmt(inputs.get("U"), 6),
             L0=_fmt(inputs.get("L0"), 6),
             B=_fmt(inputs.get("B"), 6),
-        )
+        ),
+        use_format=False
     )
     add_line(
-        "θ={theta}°，m={m}，k1类型={k1_type}".format(
+        "θ={theta}°，m={m}，k₁类型={k1_type}".format(
             theta=_fmt(inputs.get("theta_deg"), 6),
             m=_fmt(inputs.get("m"), 6),
             k1_type=str(inputs.get("k1_type")),
-        )
+        ),
+        use_format=False
     )
 
     uc_method = str(inputs.get("uc_method"))
     if uc_method == "手动输入":
-        add_line(f"Uc 取值：手动输入，Uc={_fmt(inputs.get('uc_manual'), 6)} m/s")
+        add_line(f"Uᴄ 取值：手动输入，Uᴄ={_fmt(inputs.get('uc_manual'), 6)} m/s", use_format=False)
     else:
         add_line(
-            "Uc 取值：{mth}，γs={gs} kN/m³，γ={gw} kN/m³".format(
+            "Uᴄ 取值：{mth}，γₛ={gs} kN/m³，γ={gw} kN/m³".format(
                 mth=uc_method,
                 gs=_fmt(inputs.get("gamma_s"), 6),
                 gw=_fmt(inputs.get("gamma_w"), 6),
-            )
+            ),
+            use_format=False
         )
 
     add_h("2  计算过程")
-    add_line(f"速度项指数 a 固定为 {D21_VELOCITY_EXPONENT:.2f}。")
-    add_line(f"k1={_fmt(result.k1, 6)}，k2={_fmt(result.k2, 6)}，k3={_fmt(result.k3, 6)}")
-    add_line(f"Um={_fmt(result.Um, 6)} m/s，Uc={_fmt(result.Uc, 6)} m/s")
+    add_line(f"速度项指数 a 固定为 {D21_VELOCITY_EXPONENT:.2f}。", use_format=False)
+    add_line(f"k₁={_fmt(result.k1, 6)}，k₂={_fmt(result.k2, 6)}，k₃={_fmt(result.k3, 6)}", use_format=False)
+    add_line(f"Uₘ={_fmt(result.Um, 6)} m/s，Uᴄ={_fmt(result.Uc, 6)} m/s", use_format=False)
 
     # 速度项 v = (Um-Uc)/sqrt(g*d50)
     try:
@@ -218,16 +221,18 @@ def export_d21_docx(
     except Exception:
         v_term = None
     if v_term is not None:
-        add_line(f"v=(Um−Uc)/sqrt(g·d50)={_fmt(v_term, 6)}")
+        add_line(f"v = (Uₘ − Uᴄ) / √(g·d₅₀) = {_fmt(v_term, 6)}", use_format=False)
 
-    add_line(f"hs/H0={_fmt(result.hs_over_H0, 6)}")
+    add_line(f"hₛ/H₀ = {_fmt(result.hs_over_H0, 6)}", use_format=False)
 
     add_h("3  计算结果")
-    add_line(f"hs={_fmt(result.hs, 6)} m")
+    add_line(f"hₛ = {_fmt(result.hs, 6)} m", use_format=False)
 
     add_h("附  中间量")
     for k, v in asdict(result).items():
-        add_line(f"{k} = {_fmt(v, 12)}", level=1)
+        # 格式化变量名的下标
+        k_formatted = k.replace("_", "₋")
+        add_line(f"{k_formatted} = {_fmt(v, 12)}", level=1, use_format=False)
 
     # 添加图片附件
     import os
@@ -265,26 +270,28 @@ def export_d22_docx(
 
     add_h("1  已知条件")
     add_line(
-        "H0={H0} m，U={U} m/s，Uc={Uc} m/s，α={alpha}°，n={n}".format(
+        "H₀={H0} m，U={U} m/s，Uᴄ={Uc} m/s，α={alpha}°，n={n}".format(
             H0=_fmt(inputs.get("H0"), 6),
             U=_fmt(inputs.get("U"), 6),
             Uc=_fmt(inputs.get("Uc"), 6),
             alpha=_fmt(inputs.get("alpha_deg"), 6),
             n=_fmt(inputs.get("n"), 6),
-        )
+        ),
+        use_format=False
     )
 
     add_h("2  计算过程")
-    add_line(f"η（表 D.2.2）={_fmt(result.eta, 6)}")
-    add_line(f"Uep=U·(2η/(1+η))={_fmt(result.Uep, 6)} m/s")
-    add_line(f"hs=H0·((Uep/Uc)^n−1)={_fmt(result.hs_local, 6)} m")
+    add_line(f"η（表 D.2.2）= {_fmt(result.eta, 6)}", use_format=False)
+    add_line(f"Uₑₚ = U · (2η/(1+η)) = {_fmt(result.Uep, 6)} m/s", use_format=False)
+    add_line(f"hₛ = H₀ · [(Uₑₚ/Uᴄ)ⁿ − 1] = {_fmt(result.hs_local, 6)} m", use_format=False)
 
     add_h("3  计算结果")
-    add_line(f"hs(局部)={_fmt(result.hs_local, 6)} m")
+    add_line(f"hₛ(局部) = {_fmt(result.hs_local, 6)} m", use_format=False)
 
     add_h("附  中间量")
     for k, v in asdict(result).items():
-        add_line(f"{k} = {_fmt(v, 12)}", level=1)
+        k_formatted = k.replace("_", "₋")
+        add_line(f"{k_formatted} = {_fmt(v, 12)}", level=1, use_format=False)
     
     # 添加图片附件
     import os
