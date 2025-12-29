@@ -1,0 +1,3 @@
+# Tkinter 为 Python 标准库，一般无需额外依赖
+python-docx
+streamlit
