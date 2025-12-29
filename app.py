@@ -185,10 +185,10 @@ with tab1:
                 # 执行计算
                 result_d21 = calc_d21(**inputs_d21)
                 
-                # 保存到session_state
+                # 保存到session_state（不保存name_d21，因为它已经被widget管理）
                 st.session_state.result_d21 = result_d21
                 st.session_state.inputs_d21 = inputs_d21
-                st.session_state.name_d21 = name_d21
+                st.session_state.project_name_d21 = name_d21  # 使用不同的key保存项目名称
                 
                 st.success("✅ 计算完成！")
             except Exception as e:
@@ -228,7 +228,7 @@ with tab1:
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
                         export_path = export_d21_docx(
                             path=tmp.name,
-                            name=st.session_state.name_d21,
+                            name=st.session_state.get("project_name_d21", name_d21),
                             inputs=st.session_state.inputs_d21,
                             result=result
                         )
@@ -298,10 +298,10 @@ with tab2:
                 # 执行计算
                 result_d22 = calc_d22(**inputs_d22)
                 
-                # 保存到session_state
+                # 保存到session_state（不保存name_d22，因为它已经被widget管理）
                 st.session_state.result_d22 = result_d22
                 st.session_state.inputs_d22 = inputs_d22
-                st.session_state.name_d22 = name_d22
+                st.session_state.project_name_d22 = name_d22  # 使用不同的key保存项目名称
                 
                 st.success("✅ 计算完成！")
             except Exception as e:
@@ -335,7 +335,7 @@ with tab2:
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as tmp:
                         export_path = export_d22_docx(
                             path=tmp.name,
-                            name=st.session_state.name_d22,
+                            name=st.session_state.get("project_name_d22", name_d22),
                             inputs=st.session_state.inputs_d22,
                             result=result
                         )
