@@ -198,28 +198,34 @@ with tab1:
         if "result_d21" in st.session_state:
             result = st.session_state.result_d21
             
-            st.markdown(f"""
-            <div class="result-box">
-                <h3 style="color: #2e7d32; margin-top: 0;">💡 主要结果</h3>
-                <p style="font-size: 1.8rem; font-weight: bold; color: #1b5e20; margin: 1rem 0;">
-                    hs = {result.hs:.6f} m
-                </p>
-                <p style="font-size: 1.2rem; color: #43a047;">
-                    hs/H0 = {result.hs_over_H0:.6f}
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("### 💡 主要结果")
+            st.latex(r"h_s = " + f"{result.hs:.6f}" + r"\text{ m}")
+            st.latex(r"\frac{h_s}{H_0} = " + f"{result.hs_over_H0:.6f}")
             
             st.markdown("#### 📋 中间计算结果")
             with st.expander("展开查看详细参数", expanded=True):
                 col_a, col_b = st.columns(2)
                 with col_a:
-                    st.metric("k1（位置系数）", f"{result.k1:.6f}")
-                    st.metric("k2（角度系数）", f"{result.k2:.6f}")
-                    st.metric("k3（坡率系数）", f"{result.k3:.6f}")
+                    st.metric("k₁（位置系数）", f"{result.k1:.6f}")
+                    st.metric("k₂（角度系数）", f"{result.k2:.6f}")
+                    st.metric("k₃（坡率系数）", f"{result.k3:.6f}")
                 with col_b:
-                    st.metric("Um（挑流流速）", f"{result.Um:.6f} m/s")
-                    st.metric("Uc（起动流速）", f"{result.Uc:.6f} m/s")
+                    st.metric("Uₘ（挑流流速）", f"{result.Um:.6f} m/s")
+                    st.metric("Uᴄ（起动流速）", f"{result.Uc:.6f} m/s")
+                
+                # 显示关键计算公式
+                st.markdown("##### 🔢 关键公式")
+                
+                # 计算速度项
+                try:
+                    import math
+                    v_term = (float(result.Um) - float(result.Uc)) / math.sqrt(9.81 * float(st.session_state.inputs_d21.get("d50")))
+                    
+                    st.latex(r"v = \frac{U_m - U_c}{\sqrt{g \cdot d_{50}}} = " + f"{v_term:.6f}")
+                    st.latex(r"\frac{h_s}{H_0} = k_1 \cdot k_2 \cdot k_3 \cdot v^a = " + f"{result.hs_over_H0:.6f}")
+                    st.latex(r"h_s = H_0 \cdot \frac{h_s}{H_0} = " + f"{result.hs:.6f}" + r"\text{ m}")
+                except:
+                    pass
             
             # 导出Word
             st.markdown("#### 📄 导出计算书")
@@ -311,14 +317,8 @@ with tab2:
         if "result_d22" in st.session_state:
             result = st.session_state.result_d22
             
-            st.markdown(f"""
-            <div class="result-box">
-                <h3 style="color: #2e7d32; margin-top: 0;">💡 主要结果</h3>
-                <p style="font-size: 1.8rem; font-weight: bold; color: #1b5e20; margin: 1rem 0;">
-                    hs(局部) = {result.hs_local:.6f} m
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown("### 💡 主要结果")
+            st.latex(r"h_s\text{(局部)} = " + f"{result.hs_local:.6f}" + r"\text{ m}")
             
             st.markdown("#### 📋 中间计算结果")
             with st.expander("展开查看详细参数", expanded=True):
@@ -326,7 +326,18 @@ with tab2:
                 with col_a:
                     st.metric("η（表 D.2.2）", f"{result.eta:.6f}")
                 with col_b:
-                    st.metric("Uep（边壁流速）", f"{result.Uep:.6f} m/s")
+                    st.metric("Uₑₚ（边壁流速）", f"{result.Uep:.6f} m/s")
+                
+                # 显示关键计算公式
+                st.markdown("##### 🔢 关键公式")
+                
+                try:
+                    inputs = st.session_state.inputs_d22
+                    
+                    st.latex(r"U_{ep} = U \cdot \frac{2\eta}{1+\eta} = " + f"{result.Uep:.6f}" + r"\text{ m/s}")
+                    st.latex(r"h_s = H_0 \cdot \left[\left(\frac{U_{ep}}{U_c}\right)^n - 1\right] = " + f"{result.hs_local:.6f}" + r"\text{ m}")
+                except:
+                    pass
             
             # 导出Word
             st.markdown("#### 📄 导出计算书")
